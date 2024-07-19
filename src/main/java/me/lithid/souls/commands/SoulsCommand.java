@@ -19,37 +19,32 @@ import java.util.UUID;
 public class SoulsCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        switch (args.length) {
-            case 0 -> {
-                if ((sender instanceof Player player)) {
-                    player.sendMessage(MiniMessage.miniMessage().deserialize(Souls.getInstance().getConfig().getString("messages.souls", "<green>You have <dark_green>%lives% <green> souls.").replace("%lives%", String.valueOf(String.valueOf(Souls.getInstance().getSouls().get(player.getUniqueId()))))));
-                }
+        if (args.length == 0) {
+            if ((sender instanceof Player player)) {
+                player.sendMessage(MiniMessage.miniMessage().deserialize(Souls.getInstance().getConfig().getString("messages.souls", "<green>You have <dark_green>%lives% <green> souls.").replace("%lives%", String.valueOf(String.valueOf(Souls.getInstance().getSouls().get(player.getUniqueId()))))));
             }
+            return true;
+        }
+
+        if (!sender.hasPermission("souls.admin")) {
+            sender.sendMessage(Component.text("You don't have permission to do that!", NamedTextColor.RED));
+            return true;
+        }
+        
+        UUID uuid = Bukkit.getPlayerUniqueId(args[1]);
+        if (uuid == null) {
+            sender.sendMessage(Component.text("No player found!", NamedTextColor.RED));
+            return true;
+        }
+
+        switch (args.length) {
             case 2 -> {
-                if (!sender.hasPermission("souls.admin")) {
-                    sender.sendMessage(Component.text("You don't have permission to do that!", NamedTextColor.RED));
-                    return true;
-                }
-                UUID uuid = Bukkit.getPlayerUniqueId(args[1]);
-                if (uuid == null) {
-                    sender.sendMessage(Component.text("No player found!", NamedTextColor.RED));
-                    return true;
-                }
                 if (args[0].equalsIgnoreCase("get")) {
                     sender.sendMessage(Component.text(args[1] + " has %lives% souls!".replace("%lives%", String.valueOf(Souls.getInstance().getSouls().get(uuid))), NamedTextColor.GREEN));
                 }
                 else sendCommands(sender);
             }
             case 3 -> {
-                if (!sender.hasPermission("souls.admin")) {
-                    sender.sendMessage(Component.text("You don't have permission to do that!", NamedTextColor.RED));
-                    return true;
-                }
-                UUID uuid = Bukkit.getPlayerUniqueId(args[1]);
-                if (uuid == null) {
-                    sender.sendMessage(Component.text("No player found!", NamedTextColor.RED));
-                    return true;
-                }
                 if (args[0].equalsIgnoreCase("set")) {
                     Souls.getInstance().getSouls().put(uuid, Integer.parseInt(args[2]));
                     sender.sendMessage(Component.text("Lives set!", NamedTextColor.GREEN));
